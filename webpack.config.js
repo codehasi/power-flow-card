@@ -20,7 +20,7 @@ export default {
     extensions: ['.ts', '.js'],
   },
   output: {
-    filename: 'bundle.js',
+    filename: 'ha-power-flow-card.js',
     path: path.resolve(__dirname, 'dist'),
   },
   devServer: {

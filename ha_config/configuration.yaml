@@ -8,7 +8,7 @@ hacs:
 lovelace:
   mode: yaml
   resources:
-    - url: /local/power-flow-card/bundle.js
+    - url: /local/power-flow-card/ha-power-flow-card.js
       type: module
 
 # Basic configuration

@@ -31,6 +31,13 @@ coverage/
 # Logs
 logs/
 *.log
+ha_config/home-assistant.log*
+
+# Home Assistant development files
+ha_config/.storage
+ha_config/custom_components
+ha_config/*.db*
+ha_config/secrets.yaml
 
 # Temporary files
 *.tmp
