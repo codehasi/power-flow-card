@@ -21,7 +21,7 @@ export default {
   },
   output: {
     filename: 'ha-power-flow-card.js',
-    path: path.resolve(__dirname, '.'),
+    path: path.resolve(__dirname, 'dist'),
   },
   devServer: {
     static: {

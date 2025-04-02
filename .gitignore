@@ -5,9 +5,12 @@ yarn-debug.log*
 yarn-error.log*
 
 # Build output
-dist/
 build/
 *.js.map
+
+# Allow dist for HACS
+!dist/
+!dist/ha-power-flow-card.js
 
 # TypeScript
 *.tsbuildinfo
