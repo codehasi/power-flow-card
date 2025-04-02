@@ -5,7 +5,7 @@ services:
     image: ghcr.io/home-assistant/home-assistant:stable
     volumes:
       - ./ha_config:/config
-      - ./dist:/config/www/power-flow-card
+      - .:/config/www/community/ha-power-flow-card
       # Add HACS data volume
       - hacs_data:/config/custom_components/hacs
     environment:
