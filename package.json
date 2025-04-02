@@ -1,0 +1,36 @@
+{
+  "name": "ha-power-flow-card",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint 'src/**/*.{js,ts}'",
+    "lint:fix": "eslint 'src/**/*.{js,ts}' --fix",
+    "format": "prettier --write 'src/**/*.{js,ts,json,css,md}'",
+    "clean": "rimraf dist",
+    "build": "npm run clean && webpack --mode production",
+    "start": "webpack serve --mode development --open"
+  },
+  "keywords": [],
+  "author": "Joerg",
+  "license": "ISC",
+  "description": "A custom card for Home Assistant that visualizes power flow between different sources and consumers",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.29.0",
+    "@typescript-eslint/parser": "^8.29.0",
+    "eslint": "^9.23.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-prettier": "^5.2.5",
+    "prettier": "^3.5.3",
+    "rimraf": "^6.0.1",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.8.2",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.1"
+  },
+  "dependencies": {
+    "@mdi/js": "^7.4.47"
+  }
+}

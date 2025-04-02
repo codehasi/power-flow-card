@@ -1,0 +1,6 @@
+{
+  "name": "Power Flow Card",
+  "render_readme": true,
+  "filename": "ha-power-flow-card.js",
+  "content_in_root": true
+}

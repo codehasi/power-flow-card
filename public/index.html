@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Assistant Custom Card Development</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <ha-custom-card id="powerFlow"></ha-custom-card>
+    <script src="/bundle.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const card = document.getElementById('powerFlow');
+            card.setConfig({
+                sources: [
+                    {
+                        id: 'solar1',
+                        type: 'solar',
+                        name: 'Solar Panels',
+                        power: 2500,
+                        x: 20,
+                        y: 20
+                    },
+                    {
+                        id: 'grid1',
+                        type: 'grid',
+                        name: 'Grid',
+                        power: -1000,
+                        x: 20,
+                        y: 50
+                    },
+                    {
+                        id: 'battery1',
+                        type: 'battery',
+                        name: 'Battery',
+                        power: -500,
+                        x: 20,
+                        y: 80
+                    }
+                ],
+                consumers: [
+                    {
+                        id: 'house1',
+                        name: 'Main House',
+                        power: 800,
+                        x: 80,
+                        y: 30
+                    },
+                    {
+                        id: 'ev1',
+                        name: 'EV Charger',
+                        power: 200,
+                        x: 80,
+                        y: 70
+                    }
+                ],
+                animationSpeed: 2,
+                width: 800,
+                height: 400
+            });
+        });
+    </script>
+</body>
+</html>
