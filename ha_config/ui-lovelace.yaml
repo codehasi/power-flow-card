@@ -1,0 +1,26 @@
+title: Home
+views:
+  - title: Power Flow
+    path: power-flow
+    badges: []
+    cards:
+      - type: custom:ha-power-flow-card
+        sources:
+          - type: solar
+            name: Solar
+            power: "{{ states('sensor.solar_power') | float }}"
+            x: 20
+            y: 20
+          - type: grid
+            name: Grid
+            power: "{{ states('sensor.grid_power') | float }}"
+            x: 80
+            y: 20
+        consumers:
+          - name: House
+            power: "{{ states('sensor.home_consumption') | float }}"
+            x: 50
+            y: 80
+        width: 800
+        height: 400
+        animationSpeed: 2

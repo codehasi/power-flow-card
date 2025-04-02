@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "minor_version": 9,
+  "key": "core.device_registry",
+  "data": {
+    "devices": [
+      {"area_id":null,"config_entries":["01JQTTYF3PD5F66YQ0NH3ACJ8T"],"config_entries_subentries":{"01JQTTYF3PD5F66YQ0NH3ACJ8T":[null]},"configuration_url":null,"connections":[],"created_at":"2025-04-02T08:47:37.080271+00:00","disabled_by":null,"entry_type":"service","hw_version":null,"id":"97753c00a65c8cec943cd3ae3e26fcce","identifiers":[["sun","01JQTTYF3PD5F66YQ0NH3ACJ8T"]],"labels":[],"manufacturer":null,"model":null,"model_id":null,"modified_at":"2025-04-02T08:47:37.080302+00:00","name_by_user":null,"name":"Sun","primary_config_entry":"01JQTTYF3PD5F66YQ0NH3ACJ8T","serial_number":null,"sw_version":null,"via_device_id":null}
+    ],
+    "deleted_devices": [
+      {"config_entries":["01JQTTPG25SRTPT5K1XM0G491X"],"config_entries_subentries":{"01JQTTPG25SRTPT5K1XM0G491X":[null]},"connections":[],"created_at":"2025-04-02T08:43:15.910629+00:00","identifiers":[["sun","01JQTTPG25SRTPT5K1XM0G491X"]],"id":"0b3c2dd9bdae52f1ae24cc39bd9d02dd","orphaned_timestamp":null,"modified_at":"2025-04-02T08:47:47.626732+00:00"}
+    ]
+  }
+}

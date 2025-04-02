@@ -1,0 +1,18 @@
+version: '3'
+services:
+  homeassistant:
+    container_name: homeassistant
+    image: ghcr.io/home-assistant/home-assistant:stable
+    volumes:
+      - ./ha_config:/config
+      - ./dist:/config/www/power-flow-card
+      # Add HACS data volume
+      - hacs_data:/config/custom_components/hacs
+    environment:
+      - TZ=Europe/Berlin
+    ports:
+      - "8123:8123"
+    restart: unless-stopped
+
+volumes:
+  hacs_data:

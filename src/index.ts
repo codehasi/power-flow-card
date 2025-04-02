@@ -1,6 +1,6 @@
 declare global {
   interface HTMLElementTagNameMap {
-    'ha-custom-card': HaCustomElement;
+    'ha-power-flow-card': HaCustomElement;
   }
 }
 
@@ -183,7 +183,7 @@ class HaCustomElement extends HTMLElement {
   }
 }
 
-customElements.define('ha-custom-card', HaCustomElement);
+customElements.define('ha-power-flow-card', HaCustomElement);
 
 export { HaCustomElement };
 

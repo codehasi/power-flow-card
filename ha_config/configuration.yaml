@@ -1,0 +1,41 @@
+default_config:
+
+# Enable HACS
+hacs:
+  token: !secret github_token
+
+# Load custom card
+lovelace:
+  mode: yaml
+  resources:
+    - url: /local/power-flow-card/bundle.js
+      type: module
+
+# Basic configuration
+homeassistant:
+  name: Home
+  latitude: 52.520008
+  longitude: 13.404954
+  elevation: 0
+  unit_system: metric
+  time_zone: Europe/Berlin
+
+frontend:
+  themes: !include themes.yaml
+
+# Example sensors for testing
+sensor:
+  - platform: template
+    sensors:
+      solar_power:
+        friendly_name: "Solar Power"
+        unit_of_measurement: "W"
+        value_template: "{{ range(0, 5000) | random }}"
+      grid_power:
+        friendly_name: "Grid Power"
+        unit_of_measurement: "W"
+        value_template: "{{ range(-3000, 3000) | random }}"
+      home_consumption:
+        friendly_name: "Home Consumption"
+        unit_of_measurement: "W"
+        value_template: "{{ range(500, 2000) | random }}"
