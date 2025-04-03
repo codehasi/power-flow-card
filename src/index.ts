@@ -1,13 +1,13 @@
 declare global {
   interface HTMLElementTagNameMap {
-    'ha-power-flow-card': HaCustomElement;
+    'dynamic-power-flow-card': DynamicPowerFlowCardElement;
   }
 }
 
 import { PowerFlowConfig, PowerSource, PowerConsumer } from './types';
 import { icons } from './icons';
 
-class HaCustomElement extends HTMLElement {
+class DynamicPowerFlowCardElement extends HTMLElement {
   private config: PowerFlowConfig | null = null;
 
   constructor() {
@@ -183,7 +183,7 @@ class HaCustomElement extends HTMLElement {
   }
 }
 
-customElements.define('ha-power-flow-card', HaCustomElement);
+customElements.define('dynamic-power-flow-card', DynamicPowerFlowCardElement);
 
-export { HaCustomElement };
+export { DynamicPowerFlowCardElement };
 

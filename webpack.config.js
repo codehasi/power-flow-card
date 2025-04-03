@@ -5,7 +5,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default {
-  mode: 'development',
+  mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
   entry: './src/index.ts',
   module: {
     rules: [
@@ -20,7 +20,7 @@ export default {
     extensions: ['.ts', '.js'],
   },
   output: {
-    filename: 'ha-power-flow-card.js',
+    filename: 'dynamic-power-flow-card.js',
     path: path.resolve(__dirname, 'dist'),
   },
   devServer: {

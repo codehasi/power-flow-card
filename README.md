@@ -20,7 +20,7 @@ A custom card for Home Assistant that visualizes power flow between different so
 
 ### Manual Installation
 
-1. Download `ha-power-flow-card.js` from the latest release
+1. Download `dynamic-power-flow-card.js` from the latest release
 2. Copy it to your `config/www` folder
 3. Add the following to your `configuration.yaml`:
    ```yaml

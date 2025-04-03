@@ -1,6 +1,6 @@
 {
   "name": "Power Flow Card",
   "render_readme": true,
-  "filename": "dist/ha-power-flow-card.js",
+  "filename": "dynamic-power-flow-card.js",
   "content_in_root": false
 }

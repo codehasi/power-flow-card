@@ -1,5 +1,5 @@
 {
-  "name": "ha-power-flow-card",
+  "name": "dynamic-power-flow-card",
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",
