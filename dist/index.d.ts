@@ -12,9 +12,13 @@ declare class DynamicPowerFlowCardElement extends HTMLElement {
     }>;
     set hass(hass: any);
     setConfig(config: PowerFlowConfig): void;
+    private calculateLayout;
     private createSVGElement;
     private createFlowLine;
     private createIcon;
+    private findSourceById;
+    private midPointX;
+    private getPosition;
     private render;
 }
 export { DynamicPowerFlowCardElement };

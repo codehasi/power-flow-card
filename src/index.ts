@@ -30,28 +30,92 @@ class DynamicPowerFlowCardElement extends HTMLElement {
     this.render();
   }
 
+  private calculateLayout(): void {
+    if (!this.config) return;
+
+    const edgeMargin = 15; // Margin from edges in percentage
+    const iconSize = 12; // Size of icons in percentage of height
+    const minSpacing = iconSize * 1.5; // Minimum spacing between icons
+
+    // Calculate positions for sources on the left side
+    this.config.sources.forEach((source, index) => {
+      if (!source.x || !source.y) {
+        const totalSources = this.config!.sources.length;
+        // Calculate available space and required spacing
+        const availableHeight = 100 - (2 * edgeMargin);
+        const totalSpacing = Math.max(
+          availableHeight / totalSources,
+          minSpacing
+        );
+        
+        source.x = edgeMargin;
+        source.y = edgeMargin + (index * totalSpacing) + (totalSpacing / 2);
+      }
+    });
+
+    // Calculate positions for consumers on the right side
+    this.config.consumers.forEach((consumer, index) => {
+      if (!consumer.x || !consumer.y) {
+        const totalConsumers = this.config!.consumers.length;
+        // Calculate available space and required spacing
+        const availableHeight = 100 - (2 * edgeMargin);
+        const totalSpacing = Math.max(
+          availableHeight / totalConsumers,
+          minSpacing
+        );
+
+        consumer.x = 100 - edgeMargin;
+        consumer.y = edgeMargin + (index * totalSpacing) + (totalSpacing / 2);
+      }
+    });
+  }
+
   private createSVGElement(tag: string): SVGElement {
     return document.createElementNS('http://www.w3.org/2000/svg', tag);
   }
 
-  private createFlowLine(x1: number, y1: number, x2: number, y2: number, power: number): SVGElement {
+  private createFlowLine(x1: number, y1: number, x2: number, y2: number, power: number, isSourceConnection = false): SVGElement {
     const line = this.createSVGElement('path');
     const dx = x2 - x1;
     const dy = y2 - y1;
-    const curve = Math.min(Math.abs(dx), 100); // Control point offset
     
-    // Calculate circle intersection points
+    // Calculate base values
+    const distance = Math.sqrt(dx * dx + dy * dy);
     const angle = Math.atan2(dy, dx);
-    const radius = 32; // Same as circle radius
-    
-    // Adjust start and end points to circle edges
+    const radius = 20; // Icon radius
+
+    // Calculate start and end points (adjusted for icon boundaries)
     const startX = x1 + radius * Math.cos(angle);
     const startY = y1 + radius * Math.sin(angle);
     const endX = x2 - radius * Math.cos(angle);
     const endY = y2 - radius * Math.sin(angle);
     
-    // Create curved path
-    const path = `M ${startX} ${startY} C ${startX + curve} ${startY}, ${endX - curve} ${endY}, ${endX} ${endY}`;
+    // Adjust curve intensity based on distance and connection type
+    const curveIntensity = isSourceConnection ? 0.5 : 0.2;
+    const perpDistance = distance * curveIntensity;
+    
+    // For source connections, curve away from the center
+    const centerX = this.config?.width ? this.config.width / 2 : 400;
+    const shouldCurveRight = this.midPointX(x1, x2) < centerX;
+    const curveFactor = shouldCurveRight ? 1 : -1;
+    
+    // Calculate perpendicular offset
+    const perpX = -dy / distance * perpDistance * curveFactor;
+    const perpY = dx / distance * perpDistance * curveFactor;
+    
+    // Calculate control points for smoother curves
+    const cp1x = startX + dx / 3 + perpX;
+    const cp1y = startY + dy / 3 + perpY;
+    const cp2x = endX - dx / 3 + perpX;
+    const cp2y = endY - dy / 3 + perpY;
+    
+    // Create the curved path using cubic Bézier, starting and ending at icon boundaries
+    const path = `
+      M ${startX} ${startY}
+      C ${cp1x} ${cp1y},
+        ${cp2x} ${cp2y},
+        ${endX} ${endY}
+    `;
     line.setAttribute('d', path);
     line.setAttribute('fill', 'none');
     line.setAttribute('stroke', power >= 0 ? '#4CAF50' : '#F44336');
@@ -122,8 +186,26 @@ class DynamicPowerFlowCardElement extends HTMLElement {
     return group;
   }
 
+  private findSourceById(id: string): PowerSource | undefined {
+    return this.config?.sources.find(source => source.id === id);
+  }
+
+  private midPointX(x1: number, x2: number): number {
+    return (x1 + x2) / 2;
+  }
+
+  private getPosition(element: { x?: number; y?: number }, width: number, height: number): { x: number; y: number } {
+    return {
+      x: (element.x! / 100) * width,
+      y: (element.y! / 100) * height
+    };
+  }
+
   private render(): void {
     if (!this.shadowRoot || !this.config) return;
+
+    // Calculate automatic layout if needed
+    this.calculateLayout();
 
     const width = this.config.width || 800;
     const height = this.config.height || 400;
@@ -153,6 +235,10 @@ class DynamicPowerFlowCardElement extends HTMLElement {
           font-size: 10px;
           opacity: 0.8;
         }
+        .source-connection {
+          stroke-dasharray: 4;
+          opacity: 0.7;
+        }
       </style>
       <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"></svg>
     `;
@@ -167,18 +253,29 @@ class DynamicPowerFlowCardElement extends HTMLElement {
 
     // Add sources and their connections
     this.config.sources.forEach((source: PowerSource) => {
-      const x = (source.x / 100) * width;
-      const y = (source.y / 100) * height;
-      svg.appendChild(this.createIcon(source.type, x, y, source.power, source.name));
-      svg.appendChild(this.createFlowLine(x, y, homeX, homeY, source.power));
+      const pos = this.getPosition(source, width, height);
+      svg.appendChild(this.createIcon(source.type, pos.x, pos.y, source.power, source.name));
+      svg.appendChild(this.createFlowLine(pos.x, pos.y, homeX, homeY, source.power));
+
+      // Add source-to-source connections if enabled
+      if (this.config?.showSourceConnections && source.connections) {
+        source.connections.forEach(conn => {
+          const targetSource = this.findSourceById(conn.toId);
+          if (targetSource) {
+            const targetPos = this.getPosition(targetSource, width, height);
+            const connectionLine = this.createFlowLine(pos.x, pos.y, targetPos.x, targetPos.y, conn.power, true);
+            connectionLine.classList.add('source-connection');
+            svg.appendChild(connectionLine);
+          }
+        });
+      }
     });
 
     // Add consumers and their connections
     this.config.consumers.forEach((consumer: PowerConsumer) => {
-      const x = (consumer.x / 100) * width;
-      const y = (consumer.y / 100) * height;
-      svg.appendChild(this.createIcon('consumer', x, y, consumer.power, consumer.name));
-      svg.appendChild(this.createFlowLine(homeX, homeY, x, y, consumer.power));
+      const pos = this.getPosition(consumer, width, height);
+      svg.appendChild(this.createIcon('consumer', pos.x, pos.y, consumer.power, consumer.name));
+      svg.appendChild(this.createFlowLine(homeX, homeY, pos.x, pos.y, consumer.power));
     });
   }
 }
