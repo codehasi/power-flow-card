@@ -15,6 +15,7 @@ declare class DynamicPowerFlowCardElement extends HTMLElement {
     private calculateLayout;
     private createSVGElement;
     private createFlowLine;
+    private checkForIntersections;
     private createIcon;
     private findSourceById;
     private midPointX;

@@ -38,24 +38,32 @@ Add the card to your dashboard:
 ```yaml
 type: custom:ha-power-flow-card
 sources:
-  - type: solar
+  - id: solar1
+    type: solar
     name: Solar
     power: 2000
-    x: 20
-    y: 20
-  - type: grid
+    connections:
+      - toId: battery1
+        power: 800
+  - id: grid1
+    type: grid
     name: Grid
     power: -1000
-    x: 80
-    y: 20
+  - id: battery1
+    type: battery
+    name: Home Battery
+    power: -800
 consumers:
-  - name: House
+  - id: house1
+    name: House
     power: 1000
-    x: 50
-    y: 80
+  - id: ev1
+    name: EV Charger
+    power: 200
+showSourceConnections: true
+animationSpeed: 2
 width: 800
 height: 400
-animationSpeed: 2
 ```
 
 ### Configuration Options
@@ -66,14 +74,35 @@ animationSpeed: 2
 | consumers | array | required | List of power consumers |
 | width | number | 800 | Width of the card in pixels |
 | height | number | 400 | Height of the card in pixels |
-| animationSpeed | number | 2 | Speed of the power flow animation |
+| animationSpeed | number | 2 | Speed of the power flow animation (in seconds) |
+| showSourceConnections | boolean | false | Show power flow between sources |
 
-#### Source/Consumer Options
+#### Source Options
 
 | Name | Type | Description |
 |------|------|-------------|
+| id | string | Unique identifier for the source |
 | type | string | Type of source (solar/grid/battery) |
 | name | string | Display name |
-| power | number | Power in watts (negative for outflow) |
-| x | number | X position (0-100) |
-| y | number | Y position (0-100) |
+| power | number | Power in watts (negative for consumption/charging) |
+| x | number | Optional X position (0-100). If not provided, will be automatically calculated |
+| y | number | Optional Y position (0-100). If not provided, will be automatically calculated |
+| connections | array | Optional list of connections to other sources |
+
+#### Consumer Options
+
+| Name | Type | Description |
+|------|------|-------------|
+| id | string | Unique identifier for the consumer |
+| name | string | Display name |
+| power | number | Power consumption in watts (always positive) |
+| x | number | Optional X position (0-100). If not provided, will be automatically calculated |
+| y | number | Optional Y position (0-100). If not provided, will be automatically calculated |
+
+#### Source Connection Options
+
+| Name | Type | Description |
+|------|------|-------------|
+| fromId | string | ID of the source where power flow starts |
+| toId | string | ID of the source where power flow ends |
+| power | number | Power flow in watts |

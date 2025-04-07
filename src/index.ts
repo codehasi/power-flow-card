@@ -81,45 +81,87 @@ class DynamicPowerFlowCardElement extends HTMLElement {
     
     // Calculate base values
     const distance = Math.sqrt(dx * dx + dy * dy);
-    const angle = Math.atan2(dy, dx);
-    const radius = 20; // Icon radius
+    const radius = 32; // Match the circle radius from createIcon
 
-    // Calculate start and end points (adjusted for icon boundaries)
-    const startX = x1 + radius * Math.cos(angle);
-    const startY = y1 + radius * Math.sin(angle);
-    const endX = x2 - radius * Math.cos(angle);
-    const endY = y2 - radius * Math.sin(angle);
-    
-    // Adjust curve intensity based on distance and connection type
-    const curveIntensity = isSourceConnection ? 0.5 : 0.2;
-    const perpDistance = distance * curveIntensity;
-    
-    // For source connections, curve away from the center
-    const centerX = this.config?.width ? this.config.width / 2 : 400;
-    const shouldCurveRight = this.midPointX(x1, x2) < centerX;
-    const curveFactor = shouldCurveRight ? 1 : -1;
-    
-    // Calculate perpendicular offset
-    const perpX = -dy / distance * perpDistance * curveFactor;
-    const perpY = dx / distance * perpDistance * curveFactor;
-    
-    // Calculate control points for smoother curves
-    const cp1x = startX + dx / 3 + perpX;
-    const cp1y = startY + dy / 3 + perpY;
-    const cp2x = endX - dx / 3 + perpX;
-    const cp2y = endY - dy / 3 + perpY;
-    
-    // Create the curved path using cubic Bézier, starting and ending at icon boundaries
-    const path = `
-      M ${startX} ${startY}
-      C ${cp1x} ${cp1y},
-        ${cp2x} ${cp2y},
-        ${endX} ${endY}
-    `;
+    let startX, startY, endX, endY;
+    let path: string;
+
+    if (isSourceConnection) {
+      // For source connections, always start from the left side of circles
+      startX = x1 - radius;
+      startY = y1;
+      endX = x2 - radius;
+      endY = y2;
+
+      // Calculate the maximum x-coordinate of all sources to determine safe routing space
+      const maxSourceX = Math.max(
+        ...this.config!.sources
+          .filter(s => s.x !== undefined)
+          .map(s => s.x!)
+      );
+      
+      // Calculate curve control points
+      const baseOffset = maxSourceX * 1; // 40% of max source x-coordinate for wider curves
+      const horizontalOffset = -baseOffset; // Always route to the left for source connections
+      
+      // Calculate vertical offset based on source positions and distance
+      const routeAbove = y1 > y2;
+      const verticalOffset = Math.max(
+        Math.abs(y2 - y1) * 0.75, // 75% of vertical distance
+        distance * 0.4 // At least 40% of direct distance
+      );
+      
+      // Calculate control points for a smooth curve that routes to the left
+      const midY = (startY + endY) / 2;
+      
+      // First segment: move left from start point
+      const cp1x = startX + horizontalOffset * 0.8;
+      const cp1y = startY;
+      
+      // Middle segment: curve vertically
+      const cp2x = startX + horizontalOffset;
+      const cp2y = midY;
+      
+      // Final segment: move right to end point
+      const cp3x = endX + horizontalOffset * 0.8;
+      const cp3y = endY;
+      
+      // Create a smooth curve path
+      path = `M ${startX} ${startY} ` +
+            `C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${cp2x} ${cp2y} ` +
+            `S ${cp3x} ${cp3y}, ${endX} ${endY}`;
+    } else {
+      // For regular connections, use normal angle-based connection points
+      const angle = Math.atan2(dy, dx);
+      startX = x1 + radius * Math.cos(angle);
+      startY = y1 + radius * Math.sin(angle);
+      endX = x2 - radius * Math.cos(angle);
+      endY = y2 - radius * Math.sin(angle);
+
+      // Check if we need to curve the line
+      const needsCurve = this.checkForIntersections(startX, startY, endX, endY);
+      
+      if (needsCurve) {
+        // Create curved path with moderate curve
+        const controlPointOffset = distance * 0.2;
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+
+        const controlPoint1X = midX - controlPointOffset * Math.sin(angle);
+        const controlPoint1Y = midY + controlPointOffset * Math.cos(angle);
+        const controlPoint2X = midX + controlPointOffset * Math.sin(angle);
+        const controlPoint2Y = midY - controlPointOffset * Math.cos(angle);
+
+        path = `M ${startX} ${startY} C ${controlPoint1X} ${controlPoint1Y}, ${controlPoint2X} ${controlPoint2Y}, ${endX} ${endY}`;
+      } else {
+        // Create straight path
+        path = `M ${startX} ${startY} L ${endX} ${endY}`;
+      }
+    }
     line.setAttribute('d', path);
-    line.setAttribute('fill', 'none');
     line.setAttribute('stroke', power >= 0 ? '#4CAF50' : '#F44336');
     line.setAttribute('stroke-width', '2');
+    line.setAttribute('fill', 'none');
     
     // Add flow animation
     const animationSpeed = this.config?.animationSpeed || 2;
@@ -141,6 +183,57 @@ class DynamicPowerFlowCardElement extends HTMLElement {
     line.style.animation = `flow-${power >= 0 ? 'positive' : 'negative'} ${Math.abs(actualSpeed)}s linear infinite`;
     
     return line;
+  }
+
+  private checkForIntersections(x1: number, y1: number, x2: number, y2: number): boolean {
+    if (!this.config) return false;
+
+    // Simple check: if the line is mostly vertical or horizontal, it likely doesn't need a curve
+    const dx = Math.abs(x2 - x1);
+    const dy = Math.abs(y2 - y1);
+    const isMainlyHorizontal = dx > dy * 3;
+    const isMainlyVertical = dy > dx * 3;
+
+    // If the line is clearly horizontal or vertical, prefer straight lines
+    if (isMainlyHorizontal || isMainlyVertical) {
+      return false;
+    }
+
+    // Check if line passes near any icons
+    const margin = 45; // Increased minimum distance from icons
+    
+    // More accurate line-point distance calculation
+    const checkPosition = (x: number, y: number) => {
+      // Calculate the distance from point to line segment
+      const lineLength = Math.sqrt(dx * dx + dy * dy);
+      if (lineLength === 0) return false;
+      
+      // Calculate distance from point to line using vector math
+      const t = Math.max(0, Math.min(1, ((x - x1) * (x2 - x1) + (y - y1) * (y2 - y1)) / (lineLength * lineLength)));
+      const projX = x1 + t * (x2 - x1);
+      const projY = y1 + t * (y2 - y1);
+      
+      const distance = Math.sqrt(
+        Math.pow((x - projX), 2) + 
+        Math.pow((y - projY), 2)
+      );
+      
+      return distance < margin;
+    };
+
+    // Check sources
+    for (const source of this.config.sources) {
+      if (!source.x || !source.y) continue;
+      if (checkPosition(source.x, source.y)) return true;
+    }
+
+    // Check consumers
+    for (const consumer of this.config.consumers) {
+      if (!consumer.x || !consumer.y) continue;
+      if (checkPosition(consumer.x, consumer.y)) return true;
+    }
+
+    return false;
   }
 
   private createIcon(type: string, x: number, y: number, power: number, name: string): SVGElement {
