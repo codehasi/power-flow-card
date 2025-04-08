@@ -30,13 +30,15 @@
                     'sensor.ev_battery_power': { state: '-500' },
                     'sensor.house_consumption': { state: '800' },
                     'sensor.ev_charger_power': { state: '200' },
-                    'sensor.ac_power_consumption': { state: '1500' }
+                    'sensor.ac_power_consumption': { state: '1500' },
+                    'sensor.home_power': { state: '1500' }
                 }
             };
             
             // Set the hass object
             card.hass = mockHass;
             card.setConfig({
+                home_entity_id: 'sensor.home_power',
                 sources: [
                     {
                         id: 'solar1',

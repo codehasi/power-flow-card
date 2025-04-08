@@ -24,6 +24,7 @@ export interface PowerConsumer {
 export interface PowerFlowConfig {
   sources: PowerSource[];
   consumers: PowerConsumer[];
+  home_entity_id: string; // Home Assistant entity ID for power value of home entity
   animationSpeed: number; // Base animation speed in seconds
   width?: number; // Optional width in pixels
   height?: number; // Optional height in pixels

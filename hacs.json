@@ -1,5 +1,5 @@
 {
-  "name": "Power Flow Card",
+  "name": "Dynamic Power Flow Card",
   "render_readme": true,
   "filename": "dynamic-power-flow-card.js",
   "content_in_root": false

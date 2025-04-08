@@ -4,6 +4,8 @@ A custom card for Home Assistant that visualizes power flow between different so
 
 ## Installation
 
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=codehasi&repository=power-flow-card)
+
 ### HACS (Recommended)
 
 1. Make sure you have [HACS](https://hacs.xyz) installed in your Home Assistant instance
@@ -36,7 +38,8 @@ A custom card for Home Assistant that visualizes power flow between different so
 Add the card to your dashboard:
 
 ```yaml
-type: custom:ha-power-flow-card
+type: custom:dynamic-power-flow-card
+home_entity_id: sensor.home_power
 sources:
   - id: solar1
     type: solar
@@ -81,6 +84,7 @@ The card expects entities to provide power values in watts. The sign of the valu
 |------|------|---------|-------------|
 | sources | array | required | List of power sources |
 | consumers | array | required | List of power consumers |
+| home_entity_id | string | required | Home entity ID for power value |
 | width | number | 800 | Width of the card in pixels |
 | height | number | 400 | Height of the card in pixels |
 | animationSpeed | number | 2 | Speed of the power flow animation (in seconds) |

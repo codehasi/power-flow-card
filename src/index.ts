@@ -360,7 +360,7 @@ class DynamicPowerFlowCardElement extends HTMLElement {
     // Add home icon in the center
     const homeX = width / 2;
     const homeY = height / 2;
-    svg.appendChild(this.createIcon('home', homeX, homeY, 0, 'Home'));
+    svg.appendChild(this.createIcon('home', homeX, homeY, this.config.home_entity_id || 0, 'Home'));
 
     // Add sources and their connections
     this.config.sources.forEach((source: PowerSource) => {

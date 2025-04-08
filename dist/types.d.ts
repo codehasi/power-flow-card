@@ -21,6 +21,7 @@ export interface PowerConsumer {
 export interface PowerFlowConfig {
     sources: PowerSource[];
     consumers: PowerConsumer[];
+    home_entity_id: string;
     animationSpeed: number;
     width?: number;
     height?: number;
