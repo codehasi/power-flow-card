@@ -6,11 +6,13 @@ declare global {
 import { PowerFlowConfig } from './types';
 declare class DynamicPowerFlowCardElement extends HTMLElement {
     private config;
+    private _hass;
     constructor();
     static get properties(): Record<string, {
         type: unknown;
     }>;
     set hass(hass: any);
+    private getPowerValue;
     setConfig(config: PowerFlowConfig): void;
     private calculateLayout;
     private createSVGElement;

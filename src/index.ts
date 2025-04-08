@@ -9,6 +9,7 @@ import { icons } from './icons';
 
 class DynamicPowerFlowCardElement extends HTMLElement {
   private config: PowerFlowConfig | null = null;
+  private _hass: any = null;
 
   constructor() {
     super();
@@ -22,11 +23,27 @@ class DynamicPowerFlowCardElement extends HTMLElement {
   }
 
   set hass(hass: any) {
-    // Handle Home Assistant updates if needed
+    this._hass = hass;
+    this.render();
+  }
+
+  private getPowerValue(entityId: string): number {
+    if (!this._hass || !entityId) return 0;
+    const stateObj = this._hass.states[entityId];
+    if (!stateObj) return 0;
+    return Number(stateObj.state) || 0;
   }
 
   setConfig(config: PowerFlowConfig): void {
-    this.config = config;
+    const sources: PowerSource[] = [];
+    config.sources.forEach(source => {
+      sources.push({...source});
+    });
+    const consumers: PowerConsumer[] = [];
+    config.consumers.forEach(consumer => {
+      consumers.push({...consumer});
+    });
+    this.config = {...config, sources, consumers};
     this.render();
   }
 
@@ -236,7 +253,7 @@ class DynamicPowerFlowCardElement extends HTMLElement {
     return false;
   }
 
-  private createIcon(type: string, x: number, y: number, power: number, name: string): SVGElement {
+  private createIcon(type: string, x: number, y: number, entityId: string | number, name: string): SVGElement {
     const group = this.createSVGElement('g');
     group.setAttribute('transform', `translate(${x},${y})`);
     
@@ -270,7 +287,8 @@ class DynamicPowerFlowCardElement extends HTMLElement {
     powerText.setAttribute('y', '22');
     powerText.setAttribute('text-anchor', 'middle');
     powerText.setAttribute('class', 'power-value');
-    powerText.textContent = `${Math.abs(power)}W`;
+    const powerValue = typeof entityId === 'string' ? this.getPowerValue(entityId) : entityId;
+    powerText.textContent = `${Math.abs(powerValue)}W`;
     
     group.appendChild(circle);
     group.appendChild(icon);
@@ -347,8 +365,11 @@ class DynamicPowerFlowCardElement extends HTMLElement {
     // Add sources and their connections
     this.config.sources.forEach((source: PowerSource) => {
       const pos = this.getPosition(source, width, height);
-      svg.appendChild(this.createIcon(source.type, pos.x, pos.y, source.power, source.name));
-      svg.appendChild(this.createFlowLine(pos.x, pos.y, homeX, homeY, source.power));
+      svg.appendChild(this.createIcon(source.type, pos.x, pos.y, source.entity_id, source.name));
+      const sourcePower = this.getPowerValue(source.entity_id);
+      if (sourcePower !== 0) {
+        svg.appendChild(this.createFlowLine(pos.x, pos.y, homeX, homeY, sourcePower));
+      }
 
       // Add source-to-source connections if enabled
       if (this.config?.showSourceConnections && source.connections) {
@@ -356,7 +377,12 @@ class DynamicPowerFlowCardElement extends HTMLElement {
           const targetSource = this.findSourceById(conn.toId);
           if (targetSource) {
             const targetPos = this.getPosition(targetSource, width, height);
-            const connectionLine = this.createFlowLine(pos.x, pos.y, targetPos.x, targetPos.y, conn.power, true);
+            // Calculate power flow from source to target
+            const sourcePower = this.getPowerValue(source.entity_id);
+            const targetPower = this.getPowerValue(targetSource.entity_id);
+            // If source is generating and target is consuming/charging, use source power
+            const powerFlow = sourcePower > 0 && targetPower < 0 ? Math.min(sourcePower, Math.abs(targetPower)) : 0;
+            const connectionLine = this.createFlowLine(pos.x, pos.y, targetPos.x, targetPos.y, powerFlow, true);
             connectionLine.classList.add('source-connection');
             svg.appendChild(connectionLine);
           }
@@ -367,8 +393,11 @@ class DynamicPowerFlowCardElement extends HTMLElement {
     // Add consumers and their connections
     this.config.consumers.forEach((consumer: PowerConsumer) => {
       const pos = this.getPosition(consumer, width, height);
-      svg.appendChild(this.createIcon('consumer', pos.x, pos.y, consumer.power, consumer.name));
-      svg.appendChild(this.createFlowLine(homeX, homeY, pos.x, pos.y, consumer.power));
+      svg.appendChild(this.createIcon('consumer', pos.x, pos.y, consumer.entity_id, consumer.name));
+      const consumerPower = this.getPowerValue(consumer.entity_id);
+      if (consumerPower !== 0) {
+        svg.appendChild(this.createFlowLine(homeX, homeY, pos.x, pos.y, consumerPower));
+      }
     });
   }
 }

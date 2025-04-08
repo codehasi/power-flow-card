@@ -1,13 +1,12 @@
 export interface PowerConnection {
     fromId: string;
     toId: string;
-    power: number;
 }
 export interface PowerSource {
     id: string;
     type: 'solar' | 'grid' | 'battery';
     name: string;
-    power: number;
+    entity_id: string;
     x?: number;
     y?: number;
     connections?: PowerConnection[];
@@ -15,7 +14,7 @@ export interface PowerSource {
 export interface PowerConsumer {
     id: string;
     name: string;
-    power: number;
+    entity_id: string;
     x?: number;
     y?: number;
 }

@@ -41,30 +41,39 @@ sources:
   - id: solar1
     type: solar
     name: Solar
-    power: 2000
+    entity_id: sensor.solar_power
     connections:
       - toId: battery1
         power: 800
   - id: grid1
     type: grid
     name: Grid
-    power: -1000
+    entity_id: sensor.grid_power
   - id: battery1
     type: battery
     name: Home Battery
-    power: -800
+    entity_id: sensor.battery_power
 consumers:
   - id: house1
     name: House
-    power: 1000
+    entity_id: sensor.house_consumption
   - id: ev1
     name: EV Charger
-    power: 200
+    entity_id: sensor.ev_charger_power
 showSourceConnections: true
 animationSpeed: 2
 width: 800
 height: 400
 ```
+
+### Entity Requirements
+
+The card expects entities to provide power values in watts. The sign of the value is important:
+
+- **Solar**: Positive values indicate power generation
+- **Grid**: Positive values indicate power import (consumption), negative values indicate export (feeding back to grid)
+- **Battery**: Positive values indicate discharge (providing power), negative values indicate charging
+- **Consumers**: Values should be positive, indicating consumption
 
 ### Configuration Options
 
@@ -84,7 +93,7 @@ height: 400
 | id | string | Unique identifier for the source |
 | type | string | Type of source (solar/grid/battery) |
 | name | string | Display name |
-| power | number | Power in watts (negative for consumption/charging) |
+| entity_id | string | Home Assistant entity ID providing power value in watts |
 | x | number | Optional X position (0-100). If not provided, will be automatically calculated |
 | y | number | Optional Y position (0-100). If not provided, will be automatically calculated |
 | connections | array | Optional list of connections to other sources |
@@ -95,7 +104,7 @@ height: 400
 |------|------|-------------|
 | id | string | Unique identifier for the consumer |
 | name | string | Display name |
-| power | number | Power consumption in watts (always positive) |
+| entity_id | string | Home Assistant entity ID providing power consumption in watts |
 | x | number | Optional X position (0-100). If not provided, will be automatically calculated |
 | y | number | Optional Y position (0-100). If not provided, will be automatically calculated |
 

@@ -1,14 +1,13 @@
 export interface PowerConnection {
   fromId: string;
   toId: string;
-  power: number; // Power flow in watts
 }
 
 export interface PowerSource {
   id: string;
   type: 'solar' | 'grid' | 'battery';
   name: string;
-  power: number; // Negative values indicate power consumption/charging
+  entity_id: string; // Home Assistant entity ID for power value
   x?: number; // Optional position in percentage (0-100)
   y?: number; // Optional position in percentage (0-100)
   connections?: PowerConnection[]; // Optional connections to other sources
@@ -17,7 +16,7 @@ export interface PowerSource {
 export interface PowerConsumer {
   id: string;
   name: string;
-  power: number; // Power consumption in watts
+  entity_id: string; // Home Assistant entity ID for power value
   x?: number; // Optional position in percentage (0-100)
   y?: number; // Optional position in percentage (0-100)
 }
